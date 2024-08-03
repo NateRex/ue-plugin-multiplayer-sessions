@@ -5,12 +5,29 @@
 #include "Interfaces/OnlineSessionInterface.h"
 #include "MultiplayerSessionsSubsystem.generated.h"
 
+//
+// Declarations for custom callback delegates exposed by the subsystem
+//
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerOnCreateSessionComplete, bool, bWasSuccessful);
+
+//
+// UMultiplayerSessionsSubsystem
+//
 UCLASS()
 class MULTIPLAYERSESSIONS_API UMultiplayerSessionsSubsystem : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 	
 public:
+
+	/**
+	 * Delegate that is called when this subsystem completes creation of a new session
+	 */
+	FMultiplayerOnCreateSessionComplete MultiplayerOnCreateSessionComplete;
+
+	/**
+	 * Constructor
+	 */
 	UMultiplayerSessionsSubsystem();
 
 	/**
@@ -45,6 +62,7 @@ public:
 
 private:
 	IOnlineSessionPtr SessionInterface;
+	TSharedPtr<FOnlineSessionSettings> LastSessionSettings;
 
 	FOnCreateSessionCompleteDelegate OnCreateSessionDelegate;
 	FOnFindSessionsCompleteDelegate OnFindSessionsDelegate;
@@ -58,37 +76,10 @@ private:
 	FDelegateHandle OnDestroySessionHandle;
 	FDelegateHandle OnStartSessionHandle;
 
-	/**
-	 * Callback that is triggered when a session has been created
-	 * @param SessionName - The name of the session
-	 * @param bWasSuccessful - True if creation of the session was successful. False otherwise.
-	 */
+
 	void OnCreateSession(FName SessionName, bool bWasSuccessful);
-
-	/**
-	 * Callback that is triggered when a search for sessions has completed
-	 * @param bWasSuccessful - True if the search finished successfully. False otherwise.
-	 */
 	void OnFindSessions(bool bWasSuccessful);
-
-	/**
-	 * Callback that is triggered after trying to join a session
-	 * @param SessionName - The name of the session that has been joined
-	 * @param Result - The result
-	 */
 	void OnJoinSession(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
-
-	/**
-	 * Callback that is triggered after attempting to destroy the current session
-	 * @param SessionName - The name of the session
-	 * @param bWasSuccessful - True if the session was destroyed. False otherwise.
-	 */
 	void OnDestroySession(FName SessionName, bool bWasSuccessful);
-
-	/**
-	 * Callback that is triggered after attempting to destroy the current session
-	 * @param SessionName - The name of the session
-	 * @param bWasSuccessful - True if the session was started. False otherwise.
-	 */
 	void OnStartSession(FName SessionName, bool bWasSuccessful);
 };
