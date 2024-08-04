@@ -87,10 +87,34 @@ void UMultiplayerSessionsMenu::OnCreateSession(bool bWasSuccessful)
 
 void UMultiplayerSessionsMenu::OnFindSessions(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful)
 {
+	if (!MultiplayerSessionsSubsystem) return;
+
+	for (const FOnlineSessionSearchResult Result : SessionResults)
+	{
+		// Search for session with same match type
+		FString SessionMatchType;
+		Result.Session.SessionSettings.Get(FName("MatchType"), SessionMatchType);
+		if (SessionMatchType == MatchType)
+		{
+			MultiplayerSessionsSubsystem->JoinSession(Result);
+			return;
+		}
+	}
 }
 
 void UMultiplayerSessionsMenu::OnJoinSession(EOnJoinSessionCompleteResult::Type Result)
 {
+	// Resolve IP address and travel to that server
+	if (IOnlineSessionPtr SessionInterface = MultiplayerSessionsSubsystem->GetSessionInterface())
+	{
+		FString Address;
+		SessionInterface->GetResolvedConnectString(NAME_GameSession, Address);
+		
+		if (APlayerController* PlayerController = GetGameInstance()->GetFirstLocalPlayerController())
+		{
+			PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+		}
+	}
 }
 
 void UMultiplayerSessionsMenu::OnDestroySession(bool bWasSuccessful)

@@ -56,6 +56,11 @@ public:
 	UMultiplayerSessionsSubsystem();
 
 	/**
+	 * @return A reference to the online session interface
+	 */
+	FORCEINLINE IOnlineSessionPtr GetSessionInterface() const { return SessionInterface; }
+
+	/**
 	 * Create a new online session
 	 * @param NumPublicConnections - The number of players that can join this session
 	 * @param MatchType - A string describing the type of match being hosted. Filters
