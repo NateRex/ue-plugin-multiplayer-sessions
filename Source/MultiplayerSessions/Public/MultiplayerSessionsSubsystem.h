@@ -9,6 +9,11 @@
 // Declarations for custom callback delegates exposed by the subsystem
 //
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerOnCreateSessionComplete, bool, bWasSuccessful);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FMultiplayerOnFindSessionComplete, const TArray<FOnlineSessionSearchResult>& SessionResults, bool bWasSuccessful);
+DECLARE_MULTICAST_DELEGATE_OneParam(FMultiplayerOnJoinSessionComplete, EOnJoinSessionCompleteResult::Type Result);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerOnDestroySessionComplete, bool, bWasSuccessful);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMultiplayerOnStartSessionComplete, bool, bWasSuccessful);
+
 
 //
 // UMultiplayerSessionsSubsystem
@@ -24,6 +29,26 @@ public:
 	 * Delegate that is called when this subsystem completes creation of a new session
 	 */
 	FMultiplayerOnCreateSessionComplete MultiplayerOnCreateSessionComplete;
+
+	/**
+	 * Delegate that is called when this subsystem completes a search for sessions
+	 */
+	FMultiplayerOnFindSessionComplete MultiplayerOnFindSessionsComplete;
+
+	/**
+	 * Delegate that is called when this subsystem completes joining of a session
+	 */
+	FMultiplayerOnJoinSessionComplete MultiplayerOnJoinSessionComplete;
+
+	/**
+	 * Delegate that is called when this subsystem completes tear-down of a sesssion
+	 */
+	FMultiplayerOnDestroySessionComplete MultiplayerOnDestroySessionComplete;
+
+	/**
+	 * Delegate that is called when this subsystem completes the starting of a session
+	 */
+	FMultiplayerOnStartSessionComplete MultiplayerOnStartSessionComplete;
 
 	/**
 	 * Constructor
@@ -63,6 +88,7 @@ public:
 private:
 	IOnlineSessionPtr SessionInterface;
 	TSharedPtr<FOnlineSessionSettings> LastSessionSettings;
+	TSharedPtr<FOnlineSessionSearch> LastSessionSearch;
 
 	FOnCreateSessionCompleteDelegate OnCreateSessionDelegate;
 	FOnFindSessionsCompleteDelegate OnFindSessionsDelegate;
@@ -71,7 +97,7 @@ private:
 	FOnStartSessionCompleteDelegate OnStartSessionDelegate;
 
 	FDelegateHandle OnCreateSessionHandle;
-	FDelegateHandle OnFindSessionHandle;
+	FDelegateHandle OnFindSessionsHandle;
 	FDelegateHandle OnJoinSessionHandle;
 	FDelegateHandle OnDestroySessionHandle;
 	FDelegateHandle OnStartSessionHandle;
