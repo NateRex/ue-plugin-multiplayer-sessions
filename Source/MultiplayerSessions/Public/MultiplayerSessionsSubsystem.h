@@ -107,6 +107,9 @@ private:
 	FDelegateHandle OnDestroySessionHandle;
 	FDelegateHandle OnStartSessionHandle;
 
+	bool bCreateSessionOnDestroy = false;
+	int32 LastNumPublicConnections;
+	FString LastMatchType;
 
 	void OnCreateSession(FName SessionName, bool bWasSuccessful);
 	void OnFindSessions(bool bWasSuccessful);

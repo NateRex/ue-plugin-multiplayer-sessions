@@ -34,7 +34,11 @@ void UMultiplayerSessionsSubsystem::CreateSession(int32 NumPublicConnections, FS
 	auto ExistingSession = SessionInterface->GetNamedSession(NAME_GameSession);
 	if (ExistingSession)
 	{
-		SessionInterface->DestroySession(NAME_GameSession);
+		bCreateSessionOnDestroy = true;
+		LastNumPublicConnections = NumPublicConnections;
+		LastMatchType = MatchType;
+
+		DestroySession();
 	}
 
 	// Register callback, storing delegate handle for later removal
@@ -112,6 +116,23 @@ void UMultiplayerSessionsSubsystem::JoinSession(const FOnlineSessionSearchResult
 
 void UMultiplayerSessionsSubsystem::DestroySession()
 {
+	if (!SessionInterface.IsValid())
+	{
+		// Broadcast failure
+		MultiplayerOnDestroySessionComplete.Broadcast(false);
+		return;
+	}
+
+	// Register callback, storing delegate handle for later removal
+	OnDestroySessionHandle = SessionInterface->AddOnDestroySessionCompleteDelegate_Handle(OnDestroySessionDelegate);
+
+	// Destroy session
+	if (!SessionInterface->DestroySession(NAME_GameSession))
+	{
+		// Failure occurred. Clear delegate and broadcast to listeners
+		SessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(OnDestroySessionHandle);
+		MultiplayerOnDestroySessionComplete.Broadcast(false);
+	}
 }
 
 void UMultiplayerSessionsSubsystem::StartSession()
@@ -180,6 +201,21 @@ void UMultiplayerSessionsSubsystem::OnJoinSession(FName SessionName, EOnJoinSess
 
 void UMultiplayerSessionsSubsystem::OnDestroySession(FName SessionName, bool bWasSuccessful)
 {
+	// Clear delegate handle
+	if (SessionInterface.IsValid())
+	{
+		SessionInterface->ClearOnDestroySessionCompleteDelegate_Handle(OnDestroySessionHandle);
+	}
+
+	// Possibly create new session
+	if (bWasSuccessful && bCreateSessionOnDestroy)
+	{
+		bCreateSessionOnDestroy = false;
+		CreateSession(LastNumPublicConnections, LastMatchType);
+	}
+
+	// Broadcast to listeners
+	MultiplayerOnDestroySessionComplete.Broadcast(bWasSuccessful);
 }
 
 void UMultiplayerSessionsSubsystem::OnStartSession(FName SessionName, bool bWasSuccessful)
