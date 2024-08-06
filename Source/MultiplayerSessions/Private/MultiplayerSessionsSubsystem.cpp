@@ -13,6 +13,11 @@ UMultiplayerSessionsSubsystem::UMultiplayerSessionsSubsystem():
 	if (IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get())
 	{
 		SessionInterface = Subsystem->GetSessionInterface();
+
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("Subsystem: %s"), *Subsystem->GetSubsystemName().ToString()));
+		}
 	}
 }
 
