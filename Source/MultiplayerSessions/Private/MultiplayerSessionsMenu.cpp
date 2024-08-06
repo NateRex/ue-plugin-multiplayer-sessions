@@ -3,10 +3,11 @@
 #include "MultiplayerSessionsSubsystem.h"
 #include "OnlineSessionSettings.h"
 
-void UMultiplayerSessionsMenu::Setup(int32 NumberOfPublicConnections, FString TypeOfMatch)
+void UMultiplayerSessionsMenu::Setup(FString LobbyPath, int32 NumberOfPublicConnections, FString TypeOfMatch)
 {
 	NumPublicConnections = NumberOfPublicConnections;
 	MatchType = TypeOfMatch;
+	LobbyLevelPath = FString::Printf(TEXT("%s?listen"), *LobbyPath);
 
 	// Add to viewport
 	AddToViewport();
@@ -73,7 +74,7 @@ void UMultiplayerSessionsMenu::OnCreateSession(bool bWasSuccessful)
 		// Travel to the lobby level
 		if (UWorld* World = GetWorld())
 		{
-			World->ServerTravel("/Game/ThirdPerson/Maps/Lobby?listen");
+			World->ServerTravel(LobbyLevelPath);
 		}
 	}
 	else

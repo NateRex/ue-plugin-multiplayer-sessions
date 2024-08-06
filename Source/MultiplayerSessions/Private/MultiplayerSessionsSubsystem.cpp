@@ -116,6 +116,23 @@ void UMultiplayerSessionsSubsystem::DestroySession()
 
 void UMultiplayerSessionsSubsystem::StartSession()
 {
+	if (!SessionInterface.IsValid())
+	{
+		// Broadcast failure
+		MultiplayerOnStartSessionComplete.Broadcast(false);
+		return;
+	}
+
+	// Register callback, storing delegate handle for later removal
+	OnStartSessionHandle = SessionInterface->AddOnStartSessionCompleteDelegate_Handle(OnStartSessionDelegate);
+
+	// Start session
+	if (!SessionInterface->StartSession(NAME_GameSession))
+	{
+		// Failure occurred. Clear delegate and broadcast to listeners
+		SessionInterface->ClearOnStartSessionCompleteDelegate_Handle(OnStartSessionHandle);
+		MultiplayerOnStartSessionComplete.Broadcast(false);
+	}
 }
 
 void UMultiplayerSessionsSubsystem::OnCreateSession(FName SessionName, bool bWasSuccessful)
@@ -167,4 +184,12 @@ void UMultiplayerSessionsSubsystem::OnDestroySession(FName SessionName, bool bWa
 
 void UMultiplayerSessionsSubsystem::OnStartSession(FName SessionName, bool bWasSuccessful)
 {
+	// Clear delegate handle
+	if (SessionInterface.IsValid())
+	{
+		SessionInterface->ClearOnStartSessionCompleteDelegate_Handle(OnStartSessionHandle);
+	}
+
+	// Broadcast to listeners
+	MultiplayerOnStartSessionComplete.Broadcast(bWasSuccessful);
 }

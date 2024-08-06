@@ -17,13 +17,14 @@ public:
 
 	/**
 	 * Adds this menu to the viewport
+	 * @param LobbyPath - Path to the level that will be used as a lobby for players hosting and joining sessions.
 	 * @param NumberOfPublicConnections - Number of players allowed to join sessions created from this menu.
 	 *  Defaults to 4.
 	 * @param TypeOfMatch - Type of match represented by sessions created from this menu.
 	 *  Defaults to "FreeForAll".
 	 */
 	UFUNCTION(BlueprintCallable)
-	void Setup(int32 NumberOfPublicConnections = 4, FString TypeOfMatch = FString(TEXT("FreeForAll")));
+	void Setup(FString LobbyPath, int32 NumberOfPublicConnections = 4, FString TypeOfMatch = FString(TEXT("FreeForAll")));
 
 protected:
 
@@ -43,7 +44,9 @@ private:
 
 	int32 NumPublicConnections{ 4 };
 
-	FString MatchType{TEXT("FreeForAll")};
+	FString MatchType { TEXT("FreeForAll") };
+
+	FString LobbyLevelPath { TEXT("") };
 
 	UMultiplayerSessionsSubsystem* MultiplayerSessionsSubsystem;
 
